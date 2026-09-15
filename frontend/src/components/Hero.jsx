@@ -1,17 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
   Calendar,
   Search,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+
+const showcaseCars = [
+  {
+    id: 1,
+    name: "Sports Coupe",
+    tagline: "Pure Performance",
+    image: "/assets/images/car_3d_white.jpg",
+    color: "#e2e8f0",
+  },
+  {
+    id: 2,
+    name: "Grand Tourer",
+    tagline: "Iconic Power",
+    image: "/assets/images/car_3d_red.jpg",
+    color: "#fca5a5",
+  },
+  {
+    id: 3,
+    name: "Classic Sport",
+    tagline: "Timeless Elegance",
+    image: "/assets/images/car_3d_black.jpg",
+    color: "#94a3b8",
+  },
+];
+
 const Hero = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState("");
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
+  const [activeCar, setActiveCar] = useState(0);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -19,31 +47,43 @@ const Hero = () => {
     navigate(`/vehicles${params.toString() ? `?${params}` : ""}`);
   };
 
-  // Scroll animations for dome (lightray)
-  const { scrollY } = useScroll();
-  const domeScale = useTransform(scrollY, [0, 600], [1, 2.5]);
-  const domeOpacity = useTransform(scrollY, [0, 600], [1, 0.6]);
-
-  // Car drives horizontally to the right when scrolling down
-  const carDriveX = useTransform(scrollY, [0, 800], [-1000, 1500]);
+  const nextCar = () => setActiveCar((prev) => (prev + 1) % showcaseCars.length);
+  const prevCar = () => setActiveCar((prev) => (prev - 1 + showcaseCars.length) % showcaseCars.length);
 
   return (
     <section className="hero-wrapper">
-      {/* Matching Luxury Background Image Layer */}
+      {/* Background Image Layer */}
       <div className="hero-bg-image" />
 
-      {/* Background Dome (Moon Lightray) */}
+      {/* Ambient glow that changes with active car */}
       <motion.div
-        className="dome-bg"
-        style={{
-          scale: domeScale,
-          opacity: domeOpacity,
-          x: "-50%"
+        className="hero-ambient-glow"
+        animate={{
+          background: `radial-gradient(ellipse at center bottom, ${showcaseCars[activeCar].color}44 0%, transparent 70%)`,
         }}
+        transition={{ duration: 1 }}
       />
 
+      {/* Floating particles */}
+      <div className="hero-particles">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`,
+              width: `${2 + Math.random() * 3}px`,
+              height: `${2 + Math.random() * 3}px`,
+            }}
+          />
+        ))}
+      </div>
+
       <div className="hero-main">
-        {/* Text Overlay centered high up */}
+        {/* Text Content */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -74,30 +114,152 @@ const Hero = () => {
             </button>
           </div>
         </motion.div>
+
+        {/* 3D Car Showcase */}
+        <motion.div
+          className="car-showcase-section"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <div className="car-showcase-stage">
+            {/* 3D Perspective Container */}
+            <div className="car-3d-container">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeCar}
+                  className="car-3d-hero"
+                  initial={{ opacity: 0, y: 80, scale: 0.7, rotateX: 15 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    rotateX: 0,
+                  }}
+                  exit={{ opacity: 0, y: -40, scale: 0.9 }}
+                  transition={{
+                    duration: 0.8,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                >
+                  <div className="car-img-wrapper">
+                    <motion.img
+                      src={showcaseCars[activeCar].image}
+                      alt={showcaseCars[activeCar].name}
+                      className="car-3d-img"
+                      animate={{
+                        y: [0, -8, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  </div>
+
+                  {/* Reflection under the car */}
+                  <motion.div
+                    className="car-reflection"
+                    animate={{
+                      opacity: [0.15, 0.25, 0.15],
+                      scaleX: [0.9, 1, 0.9],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+
+                  {/* Ground shadow */}
+                  <motion.div
+                    className="car-ground-shadow"
+                    animate={{
+                      scaleX: [0.85, 0.95, 0.85],
+                      opacity: [0.2, 0.35, 0.2],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Side preview cars (thumbnails) */}
+              <div className="car-side-previews">
+                {showcaseCars.map((car, i) => {
+                  if (i === activeCar) return null;
+                  const isLeft = i < activeCar || (activeCar === 0 && i === showcaseCars.length - 1);
+                  return (
+                    <motion.div
+                      key={car.id}
+                      className={`car-side-preview ${isLeft ? 'left' : 'right'}`}
+                      initial={{ opacity: 0, x: isLeft ? -50 : 50, scale: 0.6 }}
+                      animate={{ opacity: 0.5, x: 0, scale: 0.65 }}
+                      whileHover={{ opacity: 0.8, scale: 0.7 }}
+                      transition={{ duration: 0.5 }}
+                      onClick={() => setActiveCar(i)}
+                    >
+                      <div className="car-preview-img-wrapper">
+                        <img src={car.image} alt={car.name} />
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Car info + navigation */}
+            <div className="car-showcase-controls">
+              <button className="car-nav-btn" onClick={prevCar} aria-label="Previous car">
+                <ChevronLeft size={20} />
+              </button>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeCar}
+                  className="car-info-badge"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <span className="car-info-name">{showcaseCars[activeCar].name}</span>
+                  <span className="car-info-divider">•</span>
+                  <span className="car-info-tagline">{showcaseCars[activeCar].tagline}</span>
+                </motion.div>
+              </AnimatePresence>
+
+              <button className="car-nav-btn" onClick={nextCar} aria-label="Next car">
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            {/* Dot indicators */}
+            <div className="car-dots">
+              {showcaseCars.map((_, i) => (
+                <button
+                  key={i}
+                  className={`car-dot ${i === activeCar ? 'active' : ''}`}
+                  onClick={() => setActiveCar(i)}
+                  aria-label={`Show car ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Search Card & Car standing on it */}
+      {/* Search Card */}
       <motion.div
         className="search-card-wrapper"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.7, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="car-on-card-wrap">
-          <motion.div
-            className="car-on-card"
-            style={{ x: carDriveX }}
-          >
-            {/* Side view transparent Porsche */}
-
-            <img
-              src="/assets/images/car_1.png"
-              alt="Side View Luxury Car"
-              className="car-side-img"
-            />
-          </motion.div>
-        </div>
-
         <div className="search-card">
           <div className="search-field">
             <label>Location</label>
@@ -145,10 +307,8 @@ const Hero = () => {
 
       <style>{`
         .hero-wrapper {
-          background-color: #FDF8F2; /* Soft warm cream */
-          height: 100vh;
-          height: 130dvh;
-          min-height: 750px;
+          background-color: #FDF8F2;
+          min-height: 100vh;
           position: relative;
           overflow: hidden;
           font-family: var(--font-body);
@@ -182,21 +342,34 @@ const Hero = () => {
           z-index: 1;
         }
 
-        /* Background Soft Light Halo (Soft Blurred Glow - No Hard Line) */
-        .dome-bg {
+        .hero-ambient-glow {
           position: absolute;
-          top: -25%;
-          left: 50%;
-          width: 100vw;
-          height: 100vw;
-          max-width: 1500px;
-          max-height: 1500px;
-          background: radial-gradient(circle at center, rgba(255, 255, 255, 0.65) 0%, rgba(255, 248, 235, 0.35) 30%, rgba(255, 235, 190, 0.1) 55%, transparent 70%);
-          border-radius: 50%;
-          filter: blur(90px);
+          inset: 0;
           z-index: 1;
           pointer-events: none;
-          transform-origin: center center;
+        }
+
+        /* Floating Particles */
+        .hero-particles {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          pointer-events: none;
+          overflow: hidden;
+        }
+
+        .particle {
+          position: absolute;
+          background: rgba(255, 138, 0, 0.3);
+          border-radius: 50%;
+          animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+          0% { transform: translateY(0) scale(1); opacity: 0; }
+          20% { opacity: 0.6; }
+          80% { opacity: 0.3; }
+          100% { transform: translateY(-120px) scale(0.3); opacity: 0; }
         }
 
         /* Main Content */
@@ -207,21 +380,20 @@ const Hero = () => {
           align-items: center;
           justify-content: flex-start;
           position: relative;
-          z-index: 30; /* Higher than car so text sits in front */
-          padding-top: 8rem;
-          padding-bottom: 2rem;
+          z-index: 10;
+          padding-top: 7rem;
+          padding-bottom: 7rem;
           text-align: center;
-          pointer-events: none; /* Prevents container from blocking clicks to the card below */
         }
 
-        /* Text Overlay */
+        /* Text Content */
         .hero-content {
           position: relative;
           z-index: 30;
           display: flex;
           flex-direction: column;
           align-items: center;
-          pointer-events: auto; /* Re-enable clicks for text and buttons */
+          pointer-events: auto;
         }
 
         .hero-badge {
@@ -323,44 +495,246 @@ const Hero = () => {
           color: white;
         }
 
-        /* Floating Search Card & Car Wrapper */
-        .search-card-wrapper {
+        /* ===== 3D Car Showcase ===== */
+        .car-showcase-section {
+          width: 100%;
+          margin-top: 1.5rem;
+          position: relative;
+          z-index: 15;
+        }
+
+        .car-showcase-stage {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .car-3d-container {
+          position: relative;
+          width: 100%;
+          max-width: 700px;
+          height: 320px;
+          perspective: 1200px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .car-3d-hero {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transform-style: preserve-3d;
+        }
+
+        .car-img-wrapper {
+          position: relative;
+          overflow: hidden;
+          border-radius: 24px;
+          background: linear-gradient(180deg, 
+            rgba(253, 248, 242, 1) 0%,
+            rgba(250, 245, 238, 1) 30%,
+            rgba(248, 242, 234, 1) 60%,
+            rgba(245, 240, 232, 1) 100%
+          );
+          mask-image: radial-gradient(ellipse 85% 90% at center center, black 50%, transparent 100%);
+          -webkit-mask-image: radial-gradient(ellipse 85% 90% at center center, black 50%, transparent 100%);
+        }
+
+        .car-3d-img {
+          width: 520px;
+          max-width: 85vw;
+          height: auto;
+          object-fit: contain;
+          display: block;
+          mix-blend-mode: multiply;
+          cursor: pointer;
+          transition: filter 0.3s ease;
+        }
+
+        .car-3d-img:hover {
+          filter: brightness(1.05) contrast(1.05);
+        }
+
+        /* Reflection effect */
+        .car-reflection {
           position: absolute;
-          bottom: 5rem;
+          bottom: -15px;
+          left: 50%;
+          transform: translateX(-50%) scaleY(-1);
+          width: 400px;
+          max-width: 70vw;
+          height: 80px;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.08), transparent);
+          border-radius: 50%;
+          filter: blur(8px);
+          pointer-events: none;
+        }
+
+        /* Ground shadow */
+        .car-ground-shadow {
+          position: absolute;
+          bottom: -25px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 300px;
+          max-width: 55vw;
+          height: 20px;
+          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.15) 0%, transparent 70%);
+          border-radius: 50%;
+          pointer-events: none;
+        }
+
+        /* Side Preview Cars */
+        .car-side-previews {
+          position: absolute;
+          top: 50%;
           left: 0;
           right: 0;
+          transform: translateY(-50%);
+          pointer-events: none;
+          display: flex;
+          justify-content: space-between;
+          padding: 0 0;
+        }
+
+        .car-side-preview {
+          pointer-events: auto;
+          cursor: pointer;
+          opacity: 0.4;
+          transition: all 0.3s ease;
+        }
+
+        .car-side-preview.left {
+          position: absolute;
+          left: -60px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        .car-side-preview.right {
+          position: absolute;
+          right: -60px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        .car-preview-img-wrapper {
+          background: rgba(253, 248, 242, 1);
+          border-radius: 16px;
+          overflow: hidden;
+          mask-image: radial-gradient(ellipse 80% 85% at center center, black 40%, transparent 100%);
+          -webkit-mask-image: radial-gradient(ellipse 80% 85% at center center, black 40%, transparent 100%);
+        }
+
+        .car-side-preview img {
+          width: 180px;
+          height: auto;
+          object-fit: contain;
+          display: block;
+          mix-blend-mode: multiply;
+          transition: filter 0.3s ease;
+        }
+
+        .car-side-preview:hover img {
+          filter: brightness(1.05);
+        }
+
+        /* Controls */
+        .car-showcase-controls {
+          display: flex;
+          align-items: center;
+          gap: 1.25rem;
+        }
+
+        .car-nav-btn {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #111;
+          transition: all 0.25s ease;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .car-nav-btn:hover {
+          background: #FF8A00;
+          color: white;
+          border-color: #FF8A00;
+          transform: scale(1.1);
+          box-shadow: 0 8px 20px rgba(255, 138, 0, 0.3);
+        }
+
+        .car-info-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(12px);
+          padding: 0.55rem 1.25rem;
+          border-radius: 999px;
+          border: 1px solid rgba(0,0,0,0.06);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+
+        .car-info-name {
+          font-weight: 700;
+          font-size: 0.9rem;
+          color: #111;
+        }
+
+        .car-info-divider {
+          color: #ccc;
+        }
+
+        .car-info-tagline {
+          font-size: 0.85rem;
+          color: #FF8A00;
+          font-weight: 600;
+        }
+
+        /* Dot indicators */
+        .car-dots {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 0.25rem;
+        }
+
+        .car-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: rgba(0, 0, 0, 0.15);
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .car-dot.active {
+          background: #FF8A00;
+          width: 24px;
+          border-radius: 999px;
+          box-shadow: 0 0 8px rgba(255, 138, 0, 0.4);
+        }
+
+        /* Search Card */
+        .search-card-wrapper {
+          position: relative;
           z-index: 20;
           padding: 0 5%;
           display: flex;
           justify-content: center;
-        }
-
-        /* Car standing on top of the search card */
-        .car-on-card-wrap {
-          position: absolute;
-          bottom: 100%;
-          left: 0;
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          pointer-events: none;
-          margin-bottom: -45px; /* Pull car down so tires rest beautifully on the card */
-          z-index: 21;
-        }
-
-        .car-on-card {
-          width: 850px; /* Big side view car */
-          max-width: 120vw; /* Allow it to overflow the screen slightly on mobile */
-          will-change: transform;
-        }
-
-        .car-side-img {
-          position: relative;
-          top: 270px;
-          width: 100%;
-          height: auto;
-          filter: drop-shadow(-10px 30px 15px rgba(0,0,0,0.3)); /* Fake ground shadow */
-          transform: scaleX(-1); /* Flips the left-facing car so it faces right and drives right */
+          margin-top: -2rem;
+          padding-bottom: 3rem;
         }
 
         .search-card {
@@ -469,17 +843,19 @@ const Hero = () => {
         /* Responsive */
         @media (max-width: 1024px) {
           .hero-wrapper {
-            height: auto;
-            min-height: 100vh;
+            min-height: auto;
           }
-          .hero-main {
-            padding-bottom: 12rem;
+          .car-3d-container {
+            height: 280px;
+          }
+          .car-3d-img {
+            width: 420px;
+          }
+          .car-side-preview {
+            display: none;
           }
           .search-card {
             border-radius: 16px;
-          }
-          .car-on-card {
-            width: 700px;
           }
         }
 
@@ -504,8 +880,11 @@ const Hero = () => {
             min-height: 50px;
             margin-top: 0.5rem;
           }
-          .car-on-card {
-            width: 550px;
+          .car-3d-container {
+            height: 250px;
+          }
+          .car-3d-img {
+            width: 380px;
           }
         }
 
@@ -522,6 +901,34 @@ const Hero = () => {
             width: 100%;
             justify-content: center;
           }
+          .car-3d-container {
+            height: 220px;
+          }
+          .car-3d-img {
+            width: 320px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero-main {
+            padding-top: 6rem;
+            padding-bottom: 5rem;
+          }
+          .car-3d-container {
+            height: 180px;
+          }
+          .car-3d-img {
+            width: 280px;
+          }
+          .car-info-badge {
+            padding: 0.4rem 0.85rem;
+          }
+          .car-info-name {
+            font-size: 0.8rem;
+          }
+          .car-info-tagline {
+            font-size: 0.75rem;
+          }
         }
       `}</style>
     </section>
@@ -529,4 +936,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

@@ -236,7 +236,8 @@ const Companies = () => {
         }
 
         .companies-hero {
-          background: linear-gradient(135deg, #2A1F1A 0%, #1A120E 50%, #2A1F1A 100%);
+          position: relative;
+          background: linear-gradient(135deg, rgba(26, 18, 14, 0.9) 0%, rgba(42, 31, 26, 0.85) 100%), url('https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=1600') center/cover no-repeat;
           padding: 140px 5% 80px;
           color: white;
         }
