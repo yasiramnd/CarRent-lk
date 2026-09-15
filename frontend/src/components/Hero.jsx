@@ -1,905 +1,906 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  MapPin,
-  Calendar,
-  Search,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Search, ChevronDown } from "lucide-react";
+import fleetCutoutImg from "../assets/images/yamu_fleet_cutout.png";
 
-const showcaseCars = [
-  {
-    id: 1,
-    name: "Sports Coupe",
-    tagline: "Pure Performance",
-    image: "/assets/images/car_3d_white.jpg",
-    color: "#e2e8f0",
-  },
-  {
-    id: 2,
-    name: "Grand Tourer",
-    tagline: "Iconic Power",
-    image: "/assets/images/car_3d_red.jpg",
-    color: "#fca5a5",
-  },
-  {
-    id: 3,
-    name: "Classic Sport",
-    tagline: "Timeless Elegance",
-    image: "/assets/images/car_3d_black.jpg",
-    color: "#94a3b8",
-  },
+const POPULAR_BRANDS = [
+  "All Brands",
+  "Toyota",
+  "Honda",
+  "Nissan",
+  "Suzuki",
+  "Mercedes-Benz",
+  "BMW",
+  "Mitsubishi",
+  "Hyundai",
+  "Kia",
+  "Mazda",
 ];
+
+const POPULAR_MODELS = {
+  Toyota: ["All Models", "Prius", "Axio", "Premio", "Corolla", "CHR", "HiAce KDH", "Land Cruiser", "Vitz", "Raize"],
+  Honda: ["All Models", "Civic", "Vezel", "Fit", "Grace", "CR-V"],
+  Nissan: ["All Models", "X-Trail", "Leaf", "Sunny", "Caravan", "March"],
+  Suzuki: ["All Models", "Alto", "Wagon R", "Spacia", "Swift", "Hustler", "Every"],
+  "Mercedes-Benz": ["All Models", "C-Class", "E-Class", "S-Class", "GLA", "CLA"],
+  BMW: ["All Models", "3 Series", "5 Series", "7 Series", "X1", "X3", "X5"],
+};
 
 const Hero = () => {
   const navigate = useNavigate();
-  const [location, setLocation] = useState("");
-  const [pickup, setPickup] = useState("");
-  const [dropoff, setDropoff] = useState("");
-  const [activeCar, setActiveCar] = useState(0);
+  const [activeTab, setActiveTab] = useState("rent"); // "rent" | "buy"
+  const [brand, setBrand] = useState("");
+  const [model, setModel] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const availableModels = brand && POPULAR_MODELS[brand] ? POPULAR_MODELS[brand] : ["All Models"];
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (location) params.set("location", location);
-    navigate(`/vehicles${params.toString() ? `?${params}` : ""}`);
+    if (brand && brand !== "All Brands") params.set("brand", brand);
+    if (model && model !== "All Models") params.set("model", model);
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    navigate(`/vehicles${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
-  const nextCar = () => setActiveCar((prev) => (prev + 1) % showcaseCars.length);
-  const prevCar = () => setActiveCar((prev) => (prev - 1 + showcaseCars.length) % showcaseCars.length);
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   return (
-    <section className="hero-wrapper">
-      {/* Background Image Layer */}
-      <div className="hero-bg-image" />
+    <section className="yamu-exact-hero">
+      {/* Radiant Orange Gradient Background with Atmospheric Light Source */}
+      <div className="hero-gradient-overlay" />
+      <div className="hero-light-glow" />
 
-      {/* Ambient glow that changes with active car */}
-      <motion.div
-        className="hero-ambient-glow"
-        animate={{
-          background: `radial-gradient(ellipse at center bottom, ${showcaseCars[activeCar].color}44 0%, transparent 70%)`,
-        }}
-        transition={{ duration: 1 }}
-      />
-
-      {/* Floating particles */}
-      <div className="hero-particles">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${3 + Math.random() * 4}s`,
-              width: `${2 + Math.random() * 3}px`,
-              height: `${2 + Math.random() * 3}px`,
-            }}
-          />
-        ))}
+      {/* Side Pagination Dots */}
+      <div className="hero-carousel-dots">
+        <button
+          type="button"
+          aria-label="Slide 1"
+          className={`carousel-dot ${activeSlide === 0 ? "active" : ""}`}
+          onClick={() => setActiveSlide(0)}
+        >
+          <span className="dot-inner" />
+        </button>
+        <button
+          type="button"
+          aria-label="Slide 2"
+          className={`carousel-dot ${activeSlide === 1 ? "active" : ""}`}
+          onClick={() => setActiveSlide(1)}
+        >
+          <span className="dot-inner" />
+        </button>
+        <button
+          type="button"
+          aria-label="Slide 3"
+          className={`carousel-dot ${activeSlide === 2 ? "active" : ""}`}
+          onClick={() => setActiveSlide(2)}
+        >
+          <span className="dot-inner" />
+        </button>
       </div>
 
-      <div className="hero-main">
-        {/* Text Content */}
+      <div className="hero-center-stage">
+        {/* Unified Heroic Stage: Tall YAMU backdrop with foreground Fleet */}
+        <div className="heroic-fleet-stage">
+          {/* Massive Tall Watermark Text: YAMU */}
+          <motion.div
+            className="watermark-yamu-text"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            YAMU
+          </motion.div>
+
+          {/* Large Foreground Fleet Cutout overlapping the lower half */}
+          <motion.div
+            className="fleet-image-wrap"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <img
+              src={fleetCutoutImg}
+              alt="Yamu Sri Lanka Vehicle Fleet"
+              className="fleet-cutout-img"
+            />
+          </motion.div>
+        </div>
+
+        {/* Subtitles below the fleet */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          className="hero-taglines"
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
           className="hero-content"
         >
-          <div className="hero-badge">
-            <span className="badge-dot"></span>
-            Sri Lanka's #1 car sharing marketplace.
-          </div>
-
-          <h1 className="hero-title">
-            Find Your Perfect Car, <br />
-            Drive Your <span className="dreams-text">Dreams.</span>
-          </h1>
-
-          <p className="hero-subtitle">
-            Rent verified vehicles from trusted hosts across the island — or
-            list your own car and start earning in minutes.
+          <p className="hero-sub-top">
+            <span className="tag-sparkle">✦</span> Make The Right Choice <span className="tag-sparkle">✦</span>
           </p>
-
-          <div className="hero-buttons">
-            <button className="btn-primary" onClick={() => navigate("/vehicles")}>
-              Browse Cars <ArrowRight size={18} />
-            </button>
-            <button className="btn-secondary" onClick={() => navigate("/choose-listing-type")}>
-              List Your Vehicle
-            </button>
-          </div>
-        </motion.div>
-
-        {/* 3D Car Showcase */}
-        <motion.div
-          className="car-showcase-section"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <div className="car-showcase-stage">
-            {/* 3D Perspective Container */}
-            <div className="car-3d-container">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeCar}
-                  className="car-3d-hero"
-                  initial={{ opacity: 0, y: 80, scale: 0.7, rotateX: 15 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    rotateX: 0,
-                  }}
-                  exit={{ opacity: 0, y: -40, scale: 0.9 }}
-                  transition={{
-                    duration: 0.8,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                >
-                  <div className="car-img-wrapper">
-                    <motion.img
-                      src={showcaseCars[activeCar].image}
-                      alt={showcaseCars[activeCar].name}
-                      className="car-3d-img"
-                      animate={{
-                        y: [0, -8, 0],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                    />
-                  </div>
-
-                  {/* Reflection under the car */}
-                  <motion.div
-                    className="car-reflection"
-                    animate={{
-                      opacity: [0.15, 0.25, 0.15],
-                      scaleX: [0.9, 1, 0.9],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-
-                  {/* Ground shadow */}
-                  <motion.div
-                    className="car-ground-shadow"
-                    animate={{
-                      scaleX: [0.85, 0.95, 0.85],
-                      opacity: [0.2, 0.35, 0.2],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Side preview cars (thumbnails) */}
-              <div className="car-side-previews">
-                {showcaseCars.map((car, i) => {
-                  if (i === activeCar) return null;
-                  const isLeft = i < activeCar || (activeCar === 0 && i === showcaseCars.length - 1);
-                  return (
-                    <motion.div
-                      key={car.id}
-                      className={`car-side-preview ${isLeft ? 'left' : 'right'}`}
-                      initial={{ opacity: 0, x: isLeft ? -50 : 50, scale: 0.6 }}
-                      animate={{ opacity: 0.5, x: 0, scale: 0.65 }}
-                      whileHover={{ opacity: 0.8, scale: 0.7 }}
-                      transition={{ duration: 0.5 }}
-                      onClick={() => setActiveCar(i)}
-                    >
-                      <div className="car-preview-img-wrapper">
-                        <img src={car.image} alt={car.name} />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Car info + navigation */}
-            <div className="car-showcase-controls">
-              <button className="car-nav-btn" onClick={prevCar} aria-label="Previous car">
-                <ChevronLeft size={20} />
-              </button>
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeCar}
-                  className="car-info-badge"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <span className="car-info-name">{showcaseCars[activeCar].name}</span>
-                  <span className="car-info-divider">•</span>
-                  <span className="car-info-tagline">{showcaseCars[activeCar].tagline}</span>
-                </motion.div>
-              </AnimatePresence>
-
-              <button className="car-nav-btn" onClick={nextCar} aria-label="Next car">
-                <ChevronRight size={20} />
-              </button>
-            </div>
-
-            {/* Dot indicators */}
-            <div className="car-dots">
-              {showcaseCars.map((_, i) => (
-                <button
-                  key={i}
-                  className={`car-dot ${i === activeCar ? 'active' : ''}`}
-                  onClick={() => setActiveCar(i)}
-                  aria-label={`Show car ${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
+          <h2 className="hero-sub-bottom">
+            Find Your Dream Car, Which will Give You Wings
+          </h2>
         </motion.div>
       </div>
 
-      {/* Search Card */}
+      {/* Search Card with Attached Tabs */}
       <motion.div
-        className="search-card-wrapper"
-        initial={{ opacity: 0, y: 40 }}
+        className="hero-search-card-container"
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.7, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="search-card">
-          <div className="search-field">
-            <label>Location</label>
-            <div className="input-group">
-              <MapPin size={20} className="input-icon" />
-              <input
-                type="text"
-                placeholder="Colombo, Kandy, Galle..."
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
+        {/* Top Attached Tabs */}
+        <div className="hero-tabs-header">
+          <button
+            type="button"
+            className={`hero-tab-btn ${activeTab === "rent" ? "active" : ""}`}
+            onClick={() => setActiveTab("rent")}
+          >
+            I Want to Rent a Car
+          </button>
+          <button
+            type="button"
+            className={`hero-tab-btn ${activeTab === "buy" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("buy");
+              navigate("/choose-listing-type");
+            }}
+          >
+            I Want to List a Car
+          </button>
+        </div>
+
+        {/* Pure White Search Card Bar */}
+        <div className="hero-search-bar" onKeyDown={handleKeyDown}>
+          <span className="search-lead-label">I'm Looking for</span>
+
+          {/* Brand Select */}
+          <div className="search-field-pill">
+            <select
+              value={brand}
+              onChange={(e) => {
+                setBrand(e.target.value);
+                setModel("");
+              }}
+              className="search-select"
+            >
+              <option value="">Select Brand</option>
+              {POPULAR_BRANDS.map((b) => (
+                <option key={b} value={b === "All Brands" ? "" : b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="select-chevron" />
+          </div>
+
+          {/* Model Select */}
+          <div className="search-field-pill">
+            <select
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="search-select"
+            >
+              <option value="">Select Model</option>
+              {availableModels.map((m) => (
+                <option key={m} value={m === "All Models" ? "" : m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="select-chevron" />
+          </div>
+
+          {/* Price Range Row (From & To) */}
+          <div className="search-price-row">
+            {/* Price Range: From */}
+            <div className="search-price-group">
+              <span className="price-label">From</span>
+              <div className="search-input-pill">
+                <span className="currency-symbol">LKR</span>
+                <input
+                  type="number"
+                  placeholder="5,000"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className="price-input"
+                />
+              </div>
+            </div>
+
+            {/* Price Range: To */}
+            <div className="search-price-group">
+              <span className="price-label">To</span>
+              <div className="search-input-pill">
+                <span className="currency-symbol">LKR</span>
+                <input
+                  type="number"
+                  placeholder="80,000"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className="price-input"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="search-field">
-            <label>Pick-up Date</label>
-            <div className="input-group">
-              <Calendar size={20} className="input-icon" />
-              <input
-                type="date"
-                value={pickup}
-                onChange={(e) => setPickup(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="search-field">
-            <label>Return Date</label>
-            <div className="input-group">
-              <Calendar size={20} className="input-icon" />
-              <input
-                type="date"
-                value={dropoff}
-                onChange={(e) => setDropoff(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <button className="btn-search" onClick={handleSearch}>
-            <Search size={20} />
-            Search Cars
+          {/* Search CTA Button */}
+          <button
+            type="button"
+            className="hero-search-submit-btn"
+            onClick={handleSearch}
+          >
+            <Search size={16} strokeWidth={2.5} />
+            <span>Search</span>
           </button>
         </div>
       </motion.div>
 
       <style>{`
-        .hero-wrapper {
-          background-color: #FDF8F2;
+        /* =========================================================
+           1. DESKTOP MODE (Default / min-width: 1025px)
+           ========================================================= */
+        .yamu-exact-hero {
+          position: relative;
           min-height: 100vh;
-          position: relative;
-          overflow: hidden;
-          font-family: var(--font-body);
-          color: #111111;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .hero-bg-image {
-          position: absolute;
-          inset: 0;
-          background-image: url('/assets/images/hero_bg_matching.png');
-          background-size: cover;
-          background-position: center bottom;
-          opacity: 1;
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .hero-bg-image::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(253, 248, 242, 0.82) 0%,
-            rgba(253, 248, 242, 0.55) 35%,
-            rgba(253, 248, 242, 0.25) 60%,
-            rgba(253, 248, 242, 0.1) 100%
-          );
-          z-index: 1;
-        }
-
-        .hero-ambient-glow {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          pointer-events: none;
-        }
-
-        /* Floating Particles */
-        .hero-particles {
-          position: absolute;
-          inset: 0;
-          z-index: 2;
-          pointer-events: none;
-          overflow: hidden;
-        }
-
-        .particle {
-          position: absolute;
-          background: rgba(255, 138, 0, 0.3);
-          border-radius: 50%;
-          animation: particleFloat linear infinite;
-        }
-
-        @keyframes particleFloat {
-          0% { transform: translateY(0) scale(1); opacity: 0; }
-          20% { opacity: 0.6; }
-          80% { opacity: 0.3; }
-          100% { transform: translateY(-120px) scale(0.3); opacity: 0; }
-        }
-
-        /* Main Content */
-        .hero-main {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          position: relative;
-          z-index: 10;
-          padding-top: 7rem;
-          padding-bottom: 7rem;
-          text-align: center;
-        }
-
-        /* Text Content */
-        .hero-content {
-          position: relative;
-          z-index: 30;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          pointer-events: auto;
-        }
-
-        .hero-badge {
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(8px);
-          color: #111111;
-          padding: 0.4rem 1rem 0.4rem 0.5rem;
-          border-radius: 999px;
-          font-weight: 600;
-          font-size: 0.85rem;
-          margin-bottom: 1.5rem;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-          border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .badge-dot {
-          width: 8px;
-          height: 8px;
-          background: #FF8A00;
-          border-radius: 50%;
-          display: block;
-        }
-
-        .hero-title {
-          font-family: var(--font-display);
-          font-size: clamp(2.5rem, 5vw, 4.2rem);
-          font-weight: 800;
-          line-height: 1.1;
-          margin-bottom: 1rem;
-          max-width: 920px;
-          letter-spacing: -0.03em;
-          text-shadow: 0 4px 40px rgba(253, 248, 242, 0.9), 0 0 20px rgba(253, 248, 242, 0.8), 0 0 10px rgba(255, 255, 255, 1);
-        }
-
-        .dreams-text {
-          font-family: var(--font-accent);
-          color: #FF8A00;
-          font-style: italic;
-          font-weight: 500;
-          font-size: 1.05em;
-        }
-
-        .hero-subtitle {
-          font-size: 1.05rem;
-          color: #333333;
-          font-weight: 500;
-          max-width: 650px;
-          margin: 0 auto 1.5rem;
-          line-height: 1.6;
-          text-shadow: 0 4px 20px rgba(253, 248, 242, 0.9), 0 0 10px rgba(255, 255, 255, 1);
-        }
-
-        .hero-buttons {
-          display: flex;
-          gap: 1rem;
-          justify-content: center;
-        }
-
-        .btn-primary {
-          background: #FF8A00;
-          color: white;
-          padding: 0.8rem 1.8rem;
-          border-radius: 999px;
-          font-weight: 600;
-          font-size: 1rem;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          border: none;
-          cursor: pointer;
-          box-shadow: 0 10px 25px rgba(255, 138, 0, 0.3);
-          transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-        }
-
-        .btn-primary:hover {
-          background: #FF9100;
-          transform: translateY(-2px);
-          box-shadow: 0 14px 30px rgba(255, 138, 0, 0.4);
-        }
-
-        .btn-secondary {
-          background: rgba(253, 248, 242, 0.8);
-          backdrop-filter: blur(4px);
-          color: #111111;
-          padding: 0.8rem 1.8rem;
-          border-radius: 999px;
-          font-weight: 600;
-          font-size: 1rem;
-          border: 2px solid #111111;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .btn-secondary:hover {
-          background: #111111;
-          color: white;
-        }
-
-        /* ===== 3D Car Showcase ===== */
-        .car-showcase-section {
+          min-height: 100dvh;
           width: 100%;
-          margin-top: 1.5rem;
-          position: relative;
-          z-index: 15;
-        }
-
-        .car-showcase-stage {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.75rem;
-        }
-
-        .car-3d-container {
-          position: relative;
-          width: 100%;
-          max-width: 700px;
-          height: 320px;
-          perspective: 1200px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .car-3d-hero {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          transform-style: preserve-3d;
-        }
-
-        .car-img-wrapper {
-          position: relative;
-          overflow: hidden;
-          border-radius: 24px;
-          background: linear-gradient(180deg, 
-            rgba(253, 248, 242, 1) 0%,
-            rgba(250, 245, 238, 1) 30%,
-            rgba(248, 242, 234, 1) 60%,
-            rgba(245, 240, 232, 1) 100%
-          );
-          mask-image: radial-gradient(ellipse 85% 90% at center center, black 50%, transparent 100%);
-          -webkit-mask-image: radial-gradient(ellipse 85% 90% at center center, black 50%, transparent 100%);
-        }
-
-        .car-3d-img {
-          width: 520px;
-          max-width: 85vw;
-          height: auto;
-          object-fit: contain;
-          display: block;
-          mix-blend-mode: multiply;
-          cursor: pointer;
-          transition: filter 0.3s ease;
-        }
-
-        .car-3d-img:hover {
-          filter: brightness(1.05) contrast(1.05);
-        }
-
-        /* Reflection effect */
-        .car-reflection {
-          position: absolute;
-          bottom: -15px;
-          left: 50%;
-          transform: translateX(-50%) scaleY(-1);
-          width: 400px;
-          max-width: 70vw;
-          height: 80px;
-          background: linear-gradient(to bottom, rgba(0,0,0,0.08), transparent);
-          border-radius: 50%;
-          filter: blur(8px);
-          pointer-events: none;
-        }
-
-        /* Ground shadow */
-        .car-ground-shadow {
-          position: absolute;
-          bottom: -25px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 300px;
-          max-width: 55vw;
-          height: 20px;
-          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.15) 0%, transparent 70%);
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        /* Side Preview Cars */
-        .car-side-previews {
-          position: absolute;
-          top: 50%;
-          left: 0;
-          right: 0;
-          transform: translateY(-50%);
-          pointer-events: none;
-          display: flex;
           justify-content: space-between;
-          padding: 0 0;
-        }
-
-        .car-side-preview {
-          pointer-events: auto;
-          cursor: pointer;
-          opacity: 0.4;
-          transition: all 0.3s ease;
-        }
-
-        .car-side-preview.left {
-          position: absolute;
-          left: -60px;
-          top: 50%;
-          transform: translateY(-50%);
-        }
-
-        .car-side-preview.right {
-          position: absolute;
-          right: -60px;
-          top: 50%;
-          transform: translateY(-50%);
-        }
-
-        .car-preview-img-wrapper {
-          background: rgba(253, 248, 242, 1);
-          border-radius: 16px;
+          padding: 85px 2rem 2.25rem;
+          box-sizing: border-box;
           overflow: hidden;
-          mask-image: radial-gradient(ellipse 80% 85% at center center, black 40%, transparent 100%);
-          -webkit-mask-image: radial-gradient(ellipse 80% 85% at center center, black 40%, transparent 100%);
+          background-color: #ea580c;
         }
 
-        .car-side-preview img {
-          width: 180px;
-          height: auto;
-          object-fit: contain;
-          display: block;
-          mix-blend-mode: multiply;
-          transition: filter 0.3s ease;
+        /* Luminous Radiant Orange Gradient */
+        .hero-gradient-overlay {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(
+            circle at 50% 34%,
+            #ff8800 0%,
+            #f97316 26%,
+            #ea580c 58%,
+            #c2410c 88%,
+            #9a3412 100%
+          );
+          z-index: 0;
+          pointer-events: none;
         }
 
-        .car-side-preview:hover img {
-          filter: brightness(1.05);
+        /* Center Bright Aura Glow */
+        .hero-light-glow {
+          position: absolute;
+          top: 15%;
+          left: 50%;
+          transform: translate(-50%, -20%);
+          width: 900px;
+          height: 600px;
+          background: radial-gradient(
+            ellipse at center,
+            rgba(255, 255, 255, 0.28) 0%,
+            rgba(255, 210, 150, 0.18) 35%,
+            rgba(249, 115, 22, 0.05) 70%,
+            transparent 100%
+          );
+          filter: blur(60px);
+          pointer-events: none;
+          z-index: 1;
         }
 
-        /* Controls */
-        .car-showcase-controls {
+        /* Side Carousel Dots */
+        .hero-carousel-dots {
+          position: absolute;
+          right: 2.5rem;
+          top: 48%;
+          transform: translateY(-50%);
           display: flex;
-          align-items: center;
-          gap: 1.25rem;
+          flex-direction: column;
+          gap: 12px;
+          z-index: 20;
         }
 
-        .car-nav-btn {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          color: #111;
-          transition: all 0.25s ease;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        }
-
-        .car-nav-btn:hover {
-          background: #FF8A00;
-          color: white;
-          border-color: #FF8A00;
-          transform: scale(1.1);
-          box-shadow: 0 8px 20px rgba(255, 138, 0, 0.3);
-        }
-
-        .car-info-badge {
-          display: flex;
-          align-items: center;
-          gap: 0.6rem;
-          background: rgba(255, 255, 255, 0.8);
-          backdrop-filter: blur(12px);
-          padding: 0.55rem 1.25rem;
-          border-radius: 999px;
-          border: 1px solid rgba(0,0,0,0.06);
-          box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-        }
-
-        .car-info-name {
-          font-weight: 700;
-          font-size: 0.9rem;
-          color: #111;
-        }
-
-        .car-info-divider {
-          color: #ccc;
-        }
-
-        .car-info-tagline {
-          font-size: 0.85rem;
-          color: #FF8A00;
-          font-weight: 600;
-        }
-
-        /* Dot indicators */
-        .car-dots {
-          display: flex;
-          gap: 0.5rem;
-          margin-top: 0.25rem;
-        }
-
-        .car-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: rgba(0, 0, 0, 0.15);
+        .carousel-dot {
+          background: transparent;
           border: none;
           padding: 0;
           cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .car-dot.active {
-          background: #FF8A00;
-          width: 24px;
-          border-radius: 999px;
-          box-shadow: 0 0 8px rgba(255, 138, 0, 0.4);
-        }
-
-        /* Search Card */
-        .search-card-wrapper {
-          position: relative;
-          z-index: 20;
-          padding: 0 5%;
-          display: flex;
-          justify-content: center;
-          margin-top: -2rem;
-          padding-bottom: 3rem;
-        }
-
-        .search-card {
-          background: #FFFFFF;
-          border-radius: 20px;
-          padding: 1rem 1.5rem;
+          width: 16px;
+          height: 16px;
           display: flex;
           align-items: center;
-          gap: 1rem;
-          box-shadow: 0 24px 50px rgba(0,0,0,0.06);
-          width: 100%;
-          max-width: 1100px;
-          flex-wrap: wrap;
-          border: 1px solid rgba(0,0,0,0.03);
-          position: relative;
-          z-index: 20;
+          justify-content: center;
         }
 
-        .search-field {
-          flex: 1;
-          min-width: 180px;
+        .carousel-dot .dot-inner {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.45);
+          transition: all 0.25s ease;
+          display: block;
+        }
+
+        .carousel-dot.active {
+          border: 1.5px solid rgba(255, 255, 255, 0.9);
+          border-radius: 50%;
+        }
+
+        .carousel-dot.active .dot-inner {
+          background: #ffffff;
+          width: 5px;
+          height: 5px;
+        }
+
+        /* Center Stage: YAMU Watermark + Fleet + Text */
+        .hero-center-stage {
+          position: relative;
+          z-index: 10;
           display: flex;
           flex-direction: column;
-          gap: 0.3rem;
-          padding: 0.25rem 1rem;
-          border-right: 1px solid #EEEEEE;
-        }
-        
-        .search-field:nth-last-child(2) {
-          border-right: none;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          max-width: 1200px;
+          margin: auto 0;
+          padding-top: 0.5rem;
+          text-align: center;
         }
 
-        .search-field label {
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: #888888;
+        /* Unified stage — text towers high behind, cars sit neatly in front */
+        .heroic-fleet-stage {
+          position: relative;
+          width: 100%;
+          max-width: 900px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-end;
+          padding-top: 5rem;
+          overflow: visible;
+        }
+
+        /* YAMU text — bold, towering high above cars with clear visibility */
+        .watermark-yamu-text {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          font-family: 'Changa One', 'Anton', 'Oswald', cursive, sans-serif;
+          font-size: clamp(9.5rem, 17vw, 15.5rem);
+          font-weight: 400;
+          letter-spacing: -0.02em;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          color: #ffffff;
+          line-height: 0.82;
+          margin: 0;
+          padding: 0;
+          user-select: none;
+          pointer-events: none;
+          text-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.2);
+          opacity: 1;
+          z-index: 1;
+          text-align: center;
         }
 
-        .input-group {
+        /* Fleet image — sits at the bottom, overlapping only lower portion of YAMU */
+        .fleet-image-wrap {
+          position: relative;
+          z-index: 2;
+          width: 100%;
+          margin-top: -4.5rem;
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+        }
+
+        /* Clean cutout image with no shadow */
+        .fleet-cutout-img {
+          width: 100%;
+          height: auto;
+          max-height: 380px;
+          object-fit: contain;
+          filter: none;
+          box-shadow: none;
+          user-select: none;
+          pointer-events: none;
+          position: relative;
+          z-index: 2;
+        }
+
+        /* Taglines Below Vehicles */
+        .hero-taglines {
+          margin-top: 0.75rem;
+          z-index: 15;
+        }
+
+        .hero-sub-top {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.88rem;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.95);
+          margin: 0 0 6px 0;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          background: rgba(255, 255, 255, 0.12);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          padding: 4px 16px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .tag-sparkle {
+          color: #fde047;
+          font-size: 0.78rem;
+        }
+
+        .hero-sub-bottom {
+          font-size: clamp(1.1rem, 2vw, 1.4rem);
+          font-weight: 700;
+          color: #ffffff;
+          margin: 0;
+          letter-spacing: -0.01em;
+          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Search Card with Attached Tabs */
+        .hero-search-card-container {
+          position: relative;
+          z-index: 25;
+          width: 100%;
+          max-width: 1020px;
+          margin-top: auto;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        /* Top Attached Tabs */
+        .hero-tabs-header {
+          display: flex;
+          align-items: flex-end;
+          gap: 4px;
+          padding-left: 2px;
+        }
+
+        .hero-tab-btn {
+          border: none;
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          color: #ffffff;
+          padding: 10px 22px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+          border-radius: 12px 12px 0 0;
+          transition: all 0.2s ease;
+          font-family: inherit;
+        }
+
+        .hero-tab-btn.active {
+          background: #ffffff;
+          color: #ea580c;
+          font-weight: 700;
+          box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero-tab-btn:not(.active):hover {
+          background: rgba(255, 255, 255, 0.3);
+          color: #ffffff;
+        }
+
+        /* Pure White Search Card Bar */
+        .hero-search-bar {
+          background: #ffffff;
+          border-radius: 0 16px 16px 16px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08);
+          padding: 14px 20px;
+          width: 100%;
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          position: relative;
+          gap: 12px;
+          box-sizing: border-box;
+          flex-wrap: nowrap;
         }
 
-        .input-group input {
+        .search-lead-label {
+          font-size: 0.88rem;
+          font-weight: 700;
+          color: #374151;
+          white-space: nowrap;
+          padding-right: 4px;
+        }
+
+        /* Dropdown Pills */
+        .search-field-pill {
+          position: relative;
+          display: flex;
+          align-items: center;
+          background: #f8fafc;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 0 12px;
+          height: 44px;
+          flex: 1.2;
+          min-width: 120px;
+          transition: all 0.2s;
+        }
+
+        .search-field-pill:hover {
+          border-color: #cbd5e1;
+          background: #ffffff;
+        }
+
+        .search-field-pill:focus-within {
+          border-color: #ea580c;
+          background: #ffffff;
+          box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+
+        .search-select {
+          width: 100%;
           border: none;
           background: transparent;
           outline: none;
-          width: 100%;
-          font-size: 0.95rem;
-          color: #111111;
+          font-size: 0.88rem;
           font-weight: 600;
-          font-family: inherit;
+          color: #1e293b;
+          cursor: pointer;
+          appearance: none;
+          -webkit-appearance: none;
+          padding-right: 18px;
         }
-        
-        .input-group input::placeholder {
-          color: #AAAAAA;
+
+        .select-chevron {
+          position: absolute;
+          right: 12px;
+          color: #ea580c;
+          pointer-events: none;
+        }
+
+        /* Price Range Row */
+        .search-price-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex: 1.5;
+        }
+
+        /* Price Input Groups */
+        .search-price-group {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex: 1;
+          min-width: 120px;
+        }
+
+        .price-label {
+          font-size: 0.82rem;
+          font-weight: 700;
+          color: #64748b;
+          white-space: nowrap;
+        }
+
+        .search-input-pill {
+          display: flex;
+          align-items: center;
+          background: #f8fafc;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 0 10px;
+          height: 44px;
+          width: 100%;
+          transition: all 0.2s;
+        }
+
+        .search-input-pill:hover {
+          border-color: #cbd5e1;
+          background: #ffffff;
+        }
+
+        .search-input-pill:focus-within {
+          border-color: #ea580c;
+          background: #ffffff;
+          box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+
+        .currency-symbol {
+          font-size: 0.72rem;
+          font-weight: 800;
+          color: #ea580c;
+          margin-right: 4px;
+        }
+
+        .price-input {
+          width: 100%;
+          border: none;
+          background: transparent;
+          outline: none;
+          font-size: 0.88rem;
+          font-weight: 600;
+          color: #0f172a;
+        }
+
+        .price-input::placeholder {
+          color: #94a3b8;
           font-weight: 500;
         }
 
-        .input-group input[type="date"] {
-          color: #111111;
-          text-transform: uppercase;
-          font-size: 0.9rem;
-        }
-        
-        .input-group input[type="date"]::-webkit-calendar-picker-indicator {
-          opacity: 0;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          cursor: pointer;
-        }
-
-        .input-icon {
-          color: #FF8A00;
-          flex-shrink: 0;
-        }
-
-        .btn-search {
-          background: #FF8A00;
-          color: white;
+        /* Search CTA Button — Radiant Sunset Orange Theme */
+        .hero-search-submit-btn {
+          background: linear-gradient(135deg, #ff8800 0%, #f97316 45%, #ea580c 100%);
+          color: #ffffff;
           border: none;
-          border-radius: 12px;
-          padding: 1rem 2rem;
+          border-radius: 10px;
+          padding: 0 28px;
+          height: 44px;
+          font-size: 0.95rem;
           font-weight: 700;
-          font-size: 1rem;
+          cursor: pointer;
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          cursor: pointer;
-          box-shadow: 0 10px 25px rgba(255, 138, 0, 0.3);
-          transition: transform 0.2s, background 0.2s;
-          height: 100%;
-          min-height: 56px;
+          gap: 8px;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 6px 20px -2px rgba(249, 115, 22, 0.45);
+          white-space: nowrap;
+          font-family: inherit;
         }
 
-        .btn-search:hover {
-          background: #FF9100;
+        .hero-search-submit-btn:hover {
+          background: linear-gradient(135deg, #ff9500 0%, #ea580c 100%);
           transform: translateY(-2px);
+          box-shadow: 0 10px 26px -2px rgba(234, 88, 12, 0.55);
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-          .hero-wrapper {
-            min-height: auto;
+        /* =========================================================
+           2. TABLET MODE (768px <= width <= 1024px)
+           ========================================================= */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .yamu-exact-hero {
+            padding: 85px 1.5rem 2rem;
+            min-height: 100vh;
+            min-height: 100dvh;
           }
-          .car-3d-container {
-            height: 280px;
-          }
-          .car-3d-img {
-            width: 420px;
-          }
-          .car-side-preview {
+
+          .hero-carousel-dots {
             display: none;
           }
-          .search-card {
-            border-radius: 16px;
-          }
-        }
 
-        @media (max-width: 900px) {
-          .search-card {
-            flex-direction: column;
-            gap: 1rem;
+          .heroic-fleet-stage {
+            max-width: 700px;
+            padding-top: 3.8rem;
           }
-          .search-field {
+
+          .watermark-yamu-text {
+            font-size: clamp(6.8rem, 14vw, 10rem);
+            letter-spacing: -0.02em;
+            line-height: 0.84;
+          }
+
+          .fleet-image-wrap {
+            margin-top: -3.2rem;
+          }
+
+          .fleet-cutout-img {
+            max-height: 280px;
+          }
+
+          .hero-sub-bottom {
+            font-size: 1.2rem;
+          }
+
+          .hero-search-card-container {
+            max-width: 760px;
+          }
+
+          .hero-search-bar {
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 16px 18px;
+          }
+
+          .search-lead-label {
             width: 100%;
-            border-right: none;
-            border-bottom: 1px solid #EEEEEE;
-            padding: 0 0 0.75rem 0;
+            margin-bottom: -2px;
           }
-          .search-field:nth-last-child(2) {
-            border-bottom: none;
-            padding-bottom: 0;
+
+          .search-field-pill {
+            flex: 1 1 45%;
+            min-width: 180px;
           }
-          .btn-search {
-            width: 100%;
+
+          .search-price-row {
+            flex: 1 1 60%;
+            min-width: 240px;
+          }
+
+          .hero-search-submit-btn {
+            flex: 1 1 30%;
             justify-content: center;
-            min-height: 50px;
-            margin-top: 0.5rem;
-          }
-          .car-3d-container {
-            height: 250px;
-          }
-          .car-3d-img {
-            width: 380px;
+            height: 44px;
           }
         }
 
+        /* =========================================================
+           3. MOBILE MODE (width <= 768px)
+           ========================================================= */
         @media (max-width: 768px) {
-          .hero-title {
-            font-size: clamp(2.2rem, 7vw, 3rem);
+          .yamu-exact-hero {
+            padding: 72px 1rem 1.5rem;
+            min-height: auto;
+            min-height: 100dvh;
+            justify-content: flex-start;
+            gap: 0.75rem;
           }
-          .hero-buttons {
+
+          .hero-carousel-dots {
+            display: none;
+          }
+
+          .hero-center-stage {
+            margin: auto 0 0.5rem;
+            padding-top: 0.25rem;
+            width: 100%;
+          }
+
+          .heroic-fleet-stage {
+            max-width: 100%;
+            width: 100%;
+            padding-top: 2.8rem;
+          }
+
+          .watermark-yamu-text {
+            font-size: clamp(4.6rem, 19vw, 6.8rem);
+            letter-spacing: -0.02em;
+            line-height: 0.85;
+            text-shadow: 0 10px 24px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.18);
+          }
+
+          .fleet-image-wrap {
+            margin-top: -2.2rem;
+          }
+
+          .fleet-cutout-img {
+            max-height: 200px;
+            width: 100%;
+          }
+
+          .hero-taglines {
+            margin-top: 0.5rem;
+            padding: 0 0.5rem;
+          }
+
+          .hero-sub-top {
+            font-size: 0.76rem;
+            padding: 3px 12px;
+            margin-bottom: 4px;
+          }
+
+          .hero-sub-bottom {
+            font-size: 1.05rem;
+            line-height: 1.35;
+          }
+
+          /* Attached Tabs on Mobile */
+          .hero-search-card-container {
+            width: 100%;
+            max-width: 100%;
+            margin-top: auto;
+          }
+
+          .hero-tabs-header {
+            width: 100%;
+            display: flex;
+            gap: 3px;
+          }
+
+          .hero-tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 9px 8px;
+            font-size: 0.78rem;
+            border-radius: 10px 10px 0 0;
+            white-space: nowrap;
+          }
+
+          /* Search Bar on Mobile */
+          .hero-search-bar {
             flex-direction: column;
-            width: 100%;
-            max-width: 300px;
+            align-items: stretch;
+            border-radius: 0 0 16px 16px;
+            padding: 14px;
+            gap: 10px;
           }
-          .btn-primary, .btn-secondary {
+
+          .search-lead-label {
+            font-size: 0.82rem;
+            margin-bottom: -2px;
+          }
+
+          .search-field-pill {
             width: 100%;
+            min-width: 0;
+            height: 44px;
+          }
+
+          .search-price-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+          }
+
+          .search-price-group {
+            width: 100%;
+            min-width: 0;
+          }
+
+          .price-label {
+            font-size: 0.75rem;
+          }
+
+          .search-input-pill {
+            height: 42px;
+          }
+
+          .hero-search-submit-btn {
+            width: 100%;
+            height: 46px;
             justify-content: center;
+            margin-top: 2px;
+          }
+        }
+
+        /* =========================================================
+           4. EXTRA SMALL PHONES (width <= 420px)
+           ========================================================= */
+        @media (max-width: 420px) {
+          .yamu-exact-hero {
+            padding: 68px 0.75rem 1.25rem;
+          }
+
+          .heroic-fleet-stage {
+            padding-top: 2.4rem;
+          }
+
+          .watermark-yamu-text {
+            font-size: clamp(3.8rem, 18vw, 5.2rem);
+          }
+
+          .fleet-image-wrap {
+            margin-top: -1.8rem;
+          }
+
+          .fleet-cutout-img {
+            max-height: 165px;
+          }
+
+          .hero-sub-bottom {
+            font-size: 0.95rem;
+          }
+
+          .hero-tab-btn {
+            font-size: 0.72rem;
+            padding: 8px 4px;
           }
           .car-3d-container {
             height: 220px;
